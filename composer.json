@@ -21,7 +21,7 @@
         "symfony/mime": "*",
         "symfony/monolog-bundle": "^3.5",
         "symfony/notifier": "*",
-        "symfony/orm-pack": "*",
+        "symfony/orm-pack": "^1.1",
         "symfony/process": "*",
         "symfony/security-bundle": "*",
         "symfony/serializer-pack": "*",
