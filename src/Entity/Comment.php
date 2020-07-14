@@ -37,6 +37,17 @@ class Comment
      */
     private $createdAt;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Conference::class, inversedBy="comments")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $conference;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $photoFileName;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -86,6 +97,30 @@ class Comment
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getConference(): ?Conference
+    {
+        return $this->conference;
+    }
+
+    public function setConference(?Conference $conference): self
+    {
+        $this->conference = $conference;
+
+        return $this;
+    }
+
+    public function getPhotoFileName(): ?string
+    {
+        return $this->photoFileName;
+    }
+
+    public function setPhotoFileName(?string $photoFileName): self
+    {
+        $this->photoFileName = $photoFileName;
 
         return $this;
     }
