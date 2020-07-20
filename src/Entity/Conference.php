@@ -118,6 +118,6 @@ class Conference
 
     public function __toString(): string
     {
-       return $this->city . ' ' . $this->year;
+       return "#{$this->id} {$this->city} {$this->year}";
     }
 }
