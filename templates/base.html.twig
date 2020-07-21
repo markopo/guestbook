@@ -6,10 +6,45 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" href="favicon.ico" />
 
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                font-size: 1rem;
+                font-family: "Trebuchet MS", sans-serif;
+            }
+
+            header {
+                margin: 0;
+                padding: .25rem 0;
+                background: #1d2124;
+                color: #fff;
+                width: 100%;
+            }
+
+            header h1 {
+                text-align: center;
+                text-transform: uppercase;
+                font-size: 3rem;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                width: 68rem;
+                margin: 0 auto;
+            }
+        </style>
+
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
+        <header>
+            <h1>Guestbook</h1>
+        </header>
+        <div class="container">
         {% block body %}{% endblock %}
+        </div>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

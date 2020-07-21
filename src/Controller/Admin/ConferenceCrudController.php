@@ -4,10 +4,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\Conference;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 
 class ConferenceCrudController extends AbstractCrudController
 {
