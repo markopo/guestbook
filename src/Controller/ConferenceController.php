@@ -9,11 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ConferenceController extends AbstractController
 {
-
-    /**
-     * @var ConferenceRepository
-     */
-    private $conferenceRepository;
+    private ConferenceRepository $conferenceRepository;
 
 
     public function __construct(ConferenceRepository $conferenceRepository)
