@@ -10,4 +10,4 @@ services:
     ports: [5432]
   redis:
     image: redis:5-alpine
-    ports: [6379]
+    ports: [6379:6379]

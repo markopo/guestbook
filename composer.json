@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "easycorp/easyadmin-bundle": "^3.1",
+        "predis/predis": "^1.1",
         "sensio/framework-extra-bundle": "^5.5",
         "symfony/asset": "*",
         "symfony/console": "*",

@@ -8,6 +8,8 @@
     <h1>Hello {{ controller_name }}! ✅</h1>
     <div>
         <img src="{{ asset('images/under-construction.gif') }}">
+        <p>The cache was hit: {{ isCached }}</p>
+        <p>Date: {{ now }}</p>
         <br />
         {% if conferences|length > 0 %}
         <ul>
