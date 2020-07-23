@@ -4,16 +4,25 @@ namespace App\Controller;
 
 use App\Entity\Conference;
 use App\Repository\ConferenceRepository;
+use App\Transformers\ConferenceTransformerTrait;
+use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\False_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 class ConferenceController extends AbstractController
 {
+    use ConferenceTransformerTrait;
+
     private ConferenceRepository $conferenceRepository;
 
     private AdapterInterface $cache;
 
+    /**
+     * 30 seconds cache
+     */
+    const CACHE_TIME = 'PT30S';
 
     public function __construct(ConferenceRepository $conferenceRepository,
                                 AdapterInterface $cache)
@@ -28,20 +37,16 @@ class ConferenceController extends AbstractController
      */
     public function index()
     {
-        $item = $this->cache->getItem('testCacheKey');
-        $itemFromCache = true;
+        $itemCb = fn() => 'bla bla';
+        $itemFromCache = $this->getItemFromCache('guestbook.cache.testcachekey', $itemCb);
 
-        if(!$item->isHit()) {
-            $itemFromCache = false;
-            $item->set('bla bla');
-            $item->expiresAfter(new \DateInterval('PT10S'));
-            $this->cache->save($item);
-        }
+        $confCb = fn() => $this->transform($this->conferenceRepository->findAll());
+        $conferences = $this->getItemFromCache('guestbook.cache.conferences', $confCb);
 
         return $this->render('conference/index.html.twig', [
             'controller_name' => 'ConferenceController',
-            'conferences' => $this->conferenceRepository->findAll(),
-            'isCached' => $itemFromCache ? 'true' : 'false',
+            'conferences' => $conferences,
+            'isCached' => $itemFromCache,
             'now' => date('Y-m-d H:i:s')
         ]);
     }
@@ -55,5 +60,25 @@ class ConferenceController extends AbstractController
             'conference' => $conference,
             'comments' => $conference->getComments()
         ]);
+    }
+
+    /**
+     * @param string $key
+     * @param callable $callback
+     * @return \Symfony\Component\Cache\CacheItem
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    private function getItemFromCache(string $key, Callable $callback) {
+        $item = $this->cache->getItem($key);
+
+        if(!$item->isHit()) {
+            $value = $callback();
+            $item->set(json_encode($value));
+            $item->expiresAfter(new \DateInterval(self::CACHE_TIME));
+            $this->cache->save($item);
+            return $value;
+        }
+
+        return json_decode($item->get(), true);
     }
 }
