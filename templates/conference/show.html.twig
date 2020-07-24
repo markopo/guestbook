@@ -4,13 +4,13 @@
 
 {% block body %}
     <div>
-            <h2>{{ conference.city }} - {{ conference.year }}</h2>
+            <h2>{{ conference['city'] }} - {{ conference['year'] }}</h2>
             <div>
-                {% for comment in comments %}
+                {% for comment in conference['comments'] %}
                     <div>
-                        <h4>{{ comment.author }}</h4>
-                        <small>{{ comment.createdAt|format_datetime('medium', 'short') }}</small>
-                        <p>{{ comment.text }}</p>
+                        <h4>{{ comment['author'] }}</h4>
+                        <small>{{ comment['createdAt'] }}</small>
+                        <p>{{ comment['text'] }}</p>
                     </div>
                 {% endfor %}
             </div>

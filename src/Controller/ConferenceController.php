@@ -2,33 +2,25 @@
 
 namespace App\Controller;
 
-use App\Entity\Conference;
-use App\Repository\ConferenceRepository;
-use App\Transformers\ConferenceTransformerTrait;
-use phpDocumentor\Reflection\Types\Boolean;
-use phpDocumentor\Reflection\Types\False_;
+
+use App\Service\CacheService;
+use App\Service\CommentTransformerService;
+use App\Service\ConferenceTransformerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 class ConferenceController extends AbstractController
 {
-    use ConferenceTransformerTrait;
 
-    private ConferenceRepository $conferenceRepository;
+    private CacheService $cacheService;
 
-    private AdapterInterface $cache;
+    private ConferenceTransformerService $conferenceTransformerService;
 
-    /**
-     * 30 seconds cache
-     */
-    const CACHE_TIME = 'PT30S';
-
-    public function __construct(ConferenceRepository $conferenceRepository,
-                                AdapterInterface $cache)
+    public function __construct(ConferenceTransformerService $conferenceTransformerService,
+                                CacheService $cacheService)
     {
-        $this->conferenceRepository = $conferenceRepository;
-        $this->cache = $cache;
+        $this->cacheService = $cacheService;
+        $this->conferenceTransformerService = $conferenceTransformerService;
     }
 
 
@@ -38,10 +30,10 @@ class ConferenceController extends AbstractController
     public function index()
     {
         $itemCb = fn() => 'bla bla';
-        $itemFromCache = $this->getItemFromCache('guestbook.cache.testcachekey', $itemCb);
+        $itemFromCache = $this->cacheService->getItemFromCache('guestbook.cache.testcachekey', $itemCb);
 
-        $confCb = fn() => $this->transform($this->conferenceRepository->findAll());
-        $conferences = $this->getItemFromCache('guestbook.cache.conferences', $confCb);
+        $confCb = fn() => $this->conferenceTransformerService->getAll();
+        $conferences = $this->cacheService->getItemFromCache('guestbook.cache.conferences', $confCb);
 
         return $this->render('conference/index.html.twig', [
             'controller_name' => 'ConferenceController',
@@ -54,31 +46,17 @@ class ConferenceController extends AbstractController
     /**
      * @Route("/conference/{id}", name="conference")
      */
-    public function show(Conference $conference) {
+    public function show(int $id) {
+
+        $conferenceCb = fn() => $this->conferenceTransformerService->getOne($id, true);
+        $confCacheKey = "guestbook.cache.conference.{$id}";
+        $conference = $this->cacheService->getItemFromCache($confCacheKey, $conferenceCb);
+
 
         return $this->render('conference/show.html.twig', [
             'conference' => $conference,
-            'comments' => $conference->getComments()
         ]);
     }
 
-    /**
-     * @param string $key
-     * @param callable $callback
-     * @return \Symfony\Component\Cache\CacheItem
-     * @throws \Psr\Cache\InvalidArgumentException
-     */
-    private function getItemFromCache(string $key, Callable $callback) {
-        $item = $this->cache->getItem($key);
 
-        if(!$item->isHit()) {
-            $value = $callback();
-            $item->set(json_encode($value));
-            $item->expiresAfter(new \DateInterval(self::CACHE_TIME));
-            $this->cache->save($item);
-            return $value;
-        }
-
-        return json_decode($item->get(), true);
-    }
 }
