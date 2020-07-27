@@ -19,13 +19,7 @@ trait ConferenceTransformerTrait
         $confArr = [];
 
         foreach ($conferences as $conference) {
-             $confArr[] = [
-                 'id' => $conference->getId(),
-                 'city' => $conference->getCity(),
-                 'year' => $conference->getYear(),
-                 'isInternational' => $conference->getIsInternational(),
-                 'comments' => $hasComments ? $this->transformCommentList($conference->getComments()) : [],
-             ];
+             $confArr[] = $this->transformOne($conference, $hasComments);
         }
 
         return $confArr;

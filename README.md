@@ -12,5 +12,10 @@ docker-compose up -d
 #stop docker services 
 docker-compose stop
 
+#redis 
+redis-cli
+keys *
+get <key>
+exit
 
 
