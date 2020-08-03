@@ -27,7 +27,7 @@
         "symfony/process": "*",
         "symfony/security-bundle": "*",
         "symfony/serializer-pack": "*",
-        "symfony/string": "*",
+        "symfony/string": "5.1.*",
         "symfony/translation": "*",
         "symfony/twig-pack": "*",
         "symfony/validator": "*",

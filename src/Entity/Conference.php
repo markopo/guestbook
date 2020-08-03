@@ -92,6 +92,18 @@ class Conference
         return $this;
     }
 
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
     /**
      * @return Collection|Comment[]
      */
@@ -128,15 +140,5 @@ class Conference
        return "#{$this->id} {$this->city} {$this->year}";
     }
 
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
 
-    public function setSlug(?string $slug): self
-    {
-        $this->slug = $slug;
-
-        return $this;
-    }
 }
