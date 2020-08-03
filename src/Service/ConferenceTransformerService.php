@@ -22,7 +22,7 @@ class ConferenceTransformerService
         return $this->transformList($this->conferenceRepository->findAll(), $hasComments);
     }
 
-    public function getOne(int $id, bool $hasComments = false) {
-        return $this->transformOne($this->conferenceRepository->find($id), $hasComments);
+    public function getOne(string $slug, bool $hasComments = false) {
+        return $this->transformOne($this->conferenceRepository->findOneBy(['slug' => $slug]), $hasComments);
     }
 }

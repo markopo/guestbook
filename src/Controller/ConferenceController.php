@@ -44,14 +44,13 @@ class ConferenceController extends AbstractController
     }
 
     /**
-     * @Route("/conference/{id}", name="conference")
+     * @Route("/conference/{slug}", name="conference")
      */
-    public function show(int $id) {
+    public function show(string $slug) {
 
-        $conferenceCb = fn() => $this->conferenceTransformerService->getOne($id, true);
-        $confCacheKey = "guestbook.cache.conference.{$id}";
+        $conferenceCb = fn() => $this->conferenceTransformerService->getOne($slug, true);
+        $confCacheKey = "guestbook.cache.conference.{$slug}";
         $conference = $this->cacheService->getItemFromCache($confCacheKey, $conferenceCb);
-
 
         return $this->render('conference/show.html.twig', [
             'conference' => $conference,

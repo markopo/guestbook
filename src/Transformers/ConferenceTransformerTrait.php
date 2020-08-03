@@ -36,6 +36,7 @@ trait ConferenceTransformerTrait
             'city' => $conference->getCity(),
             'year' => $conference->getYear(),
             'isInternational' => $conference->getIsInternational(),
+            'slug' => $conference->getSlug(),
             'comments' => $hasComments ? $this->transformCommentList($conference->getComments()) : [],
         ];
     }
