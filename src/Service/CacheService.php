@@ -4,6 +4,7 @@
 namespace App\Service;
 
 
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 class CacheService
@@ -41,5 +42,13 @@ class CacheService
         }
 
         return json_decode($item->get(), true);
+    }
+
+    public function clearCacheKey(string $key): bool {
+        try {
+           return $this->cache->deleteItem($key);
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
     }
 }

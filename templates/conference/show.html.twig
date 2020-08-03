@@ -7,14 +7,25 @@
             <h2>{{ conference['city'] }} - {{ conference['year'] }}</h2>
             <div>
                 {% for comment in conference['comments'] %}
-                    <div>
-                        <h4>{{ comment['author'] }}</h4>
-                        <small>{{ comment['createdAt'] }}</small>
-                        <p>{{ comment['text'] }}</p>
+                    <div class="comment">
+                        <div class="column">
+                            <h4>{{ comment['author'] }}</h4>
+                            <small>{{ comment['createdAt'] }}</small>
+                            <p>{{ comment['text'] }}</p>
+                        </div>
+                        <div class="column">
+                            {% if comment['photoFileName'] != null %}
+                                <img alt="{{ comment['photoFileName'] }}" style="width:100%;height: auto;" src="{{ asset("uploads/photos/#{comment['photoFileName']}")  }}" />
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
             <hr />
+            <div>
+                <h3>Add your own feedback</h3>
+                {{ form(comment_form) }}
+            </div>
             <p><a href="{{ path('homepage') }}">Go back</a></p>
     </div>
 {% endblock %}

@@ -21,7 +21,8 @@ trait CommentTransformerTrait {
                 'author' => $comment->getAuthor(),
                 'text' => $comment->getText(),
                 'email' => $comment->getEmail(),
-                'createdAt' => date_format($comment->getCreatedAt(), 'Y-m-d H:i:s')
+                'createdAt' => date_format($comment->getCreatedAt(), 'Y-m-d H:i:s'),
+                'photoFileName' => $comment->getPhotoFileName()
             ];
 
         }
