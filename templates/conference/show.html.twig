@@ -15,7 +15,7 @@
                         </div>
                         <div class="column">
                             {% if comment['photoFileName'] != null %}
-                                <img alt="{{ comment['photoFileName'] }}" style="width:100%;height: auto;" src="{{ asset("uploads/photos/#{comment['photoFileName']}")  }}" />
+                                <img alt="{{ comment['photoFileName'] }}" style="margin: 0 auto;display:block;border:.1rem solid #ccc;padding:.1rem;border-radius: 50%;width:200px;height: auto;" src="{{ asset("uploads/photos/#{comment['photoFileName']}")  }}" />
                             {% endif %}
                         </div>
                     </div>

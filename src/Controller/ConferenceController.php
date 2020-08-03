@@ -11,6 +11,7 @@ use App\Service\CacheService;
 use App\Service\CommentTransformerService;
 use App\Service\ConferenceTransformerService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -30,17 +31,22 @@ class ConferenceController extends AbstractController
 
     private CommentRepository $commentRepository;
 
+    private LoggerInterface $logger;
+
+
     public function __construct(ConferenceTransformerService $conferenceTransformerService,
                                 CacheService $cacheService,
                                 EntityManagerInterface $entityManager,
                                 ConferenceRepository $conferenceRepository,
-                                CommentRepository $commentRepository)
+                                CommentRepository $commentRepository,
+                                LoggerInterface $logger)
     {
         $this->cacheService = $cacheService;
         $this->conferenceTransformerService = $conferenceTransformerService;
         $this->entityManager = $entityManager;
         $this->conferenceRepository = $conferenceRepository;
         $this->commentRepository = $commentRepository;
+        $this->logger = $logger;
     }
 
 
@@ -78,42 +84,54 @@ class ConferenceController extends AbstractController
 
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()) {
-
-            if($conferenceId > 0) {
-                $conf = $this->conferenceRepository->find($conferenceId);
-                $comment->setConference($conf);
-                $comment->setCreatedAtValue();
-
-                /** @var UploadedFile $brochureFile */
-                $photo = $form->get('photoFileName')->getData();
-
-                if($photo !== null) {
-                    $fileName = bin2hex(random_bytes(6)).'.'. $photo->guessClientExtension();
-
-                    try {
-                        $photo->move($photoDir, $fileName);
-                    }
-                    catch (FileException $fileException) {
-                        dd($fileException);
-                    }
-
-                    $comment->setPhotoFileName($fileName);
-                }
-
-                $this->entityManager->persist($comment);
-                $this->entityManager->flush();
-
-                $this->cacheService->clearCacheKey($confCacheKey);
-
-                return $this->redirectToRoute('conference', [ 'slug' => $conf->getSlug() ]);
-            }
+        if($form->isSubmitted() && $form->isValid() && $conferenceId > 0) {
+            $conf = $this->saveComment($conferenceId, $comment, $form, $photoDir, $confCacheKey);
+            return $this->redirectToRoute('conference', [ 'slug' => $conf->getSlug() ]);
         }
 
         return $this->render('conference/show.html.twig', [
             'conference' => $conference,
             'comment_form' => $form->createView()
         ]);
+    }
+
+    /**
+     * @param int $conferenceId
+     * @param Comment $comment
+     * @param \Symfony\Component\Form\FormInterface $form
+     * @param string $photoDir
+     * @param string $confCacheKey
+     * @return \App\Entity\Conference|null
+     * @throws \Exception
+     */
+    private function saveComment(int $conferenceId, Comment $comment, \Symfony\Component\Form\FormInterface $form, string $photoDir, string $confCacheKey)
+    {
+        $conf = $this->conferenceRepository->find($conferenceId);
+        $comment->setConference($conf);
+        $comment->setCreatedAtValue();
+
+        /** @var UploadedFile $brochureFile */
+        $photo = $form->get('photoFileName')->getData();
+
+        if ($photo !== null) {
+            $fileName = bin2hex(random_bytes(6)) . '.' . $photo->guessClientExtension();
+
+            try {
+                $photo->move($photoDir, $fileName);
+            } catch (FileException $fileException) {
+                $this->logger->error($fileException->getMessage());
+            }
+
+            $comment->setPhotoFileName($fileName);
+        }
+
+        $this->entityManager->persist($comment);
+        $this->entityManager->flush();
+
+        $this->cacheService->clearCacheKey($confCacheKey);
+
+        $this->logger->info('Added new comment with id of: ' . $comment->getId());
+        return $conf;
     }
 
 
