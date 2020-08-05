@@ -20,14 +20,21 @@
                 background: #1d2124;
                 color: #fff;
                 width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
 
             header h1 {
-                text-align: center;
                 text-transform: uppercase;
                 font-size: 3rem;
-                margin: 0;
+                margin: 0 0 0 2rem;
                 padding: 0;
+            }
+
+            header a {
+                margin-right: 2rem;
+                color: #fff;
             }
 
             .container {
@@ -90,6 +97,13 @@
     <body>
         <header>
             <h1>Guestbook</h1>
+            {% if app.user %}
+                <div class="mb-3">
+                    You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
+                </div>
+            {% else %}
+                <a href="{{ path('app_login') }}">Login</a>
+            {% endif %}
         </header>
         <div class="container">
         {% block body %}{% endblock %}
