@@ -83,6 +83,7 @@ class ConferenceController extends AbstractController
         $confCacheKey = "guestbook.cache.conference.{$slug}";
         $conference = $this->cacheService->getItemFromCache($confCacheKey, $conferenceCb);
         $conferenceId = $conference !== null ? $conference['id'] : 0;
+        $errorMessage = '';
 
         $comment = new Comment();
         $form = $this->createForm(CommentFormType::class, $comment);
@@ -92,18 +93,20 @@ class ConferenceController extends AbstractController
         if($form->isSubmitted() && $form->isValid() && $conferenceId > 0) {
 
             $comment->setCreatedAtValue();
+            $hasSpam = $this->checkSpam($request, $comment);
 
-            if($this->checkSpam($request, $comment)) {
-                throw new \RuntimeException('Blatant spam, go away!');
+            if($hasSpam) {
+                $errorMessage = 'Blatant spam, go away!';
+            } else {
+                $conf = $this->saveComment($conferenceId, $comment, $form, $photoDir, $confCacheKey);
+                return $this->redirectToRoute('conference', [ 'slug' => $conf->getSlug() ]);
             }
-
-            $conf = $this->saveComment($conferenceId, $comment, $form, $photoDir, $confCacheKey);
-            return $this->redirectToRoute('conference', [ 'slug' => $conf->getSlug() ]);
         }
 
         return $this->render('conference/show.html.twig', [
             'conference' => $conference,
-            'comment_form' => $form->createView()
+            'comment_form' => $form->createView(),
+            'errorMessage' => $errorMessage
         ]);
     }
 

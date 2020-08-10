@@ -33,7 +33,8 @@
         "symfony/validator": "*",
         "symfony/web-link": "*",
         "symfony/yaml": "*",
-        "twig/intl-extra": "^3.0"
+        "twig/intl-extra": "^3.0",
+        "snipe/banbuilder": "dev-master"
     },
     "require-dev": {
         "symfony/debug-pack": "^1.0",

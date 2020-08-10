@@ -32,5 +32,9 @@ services:
             - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\Conference' }
             - { name: 'doctrine.orm.entity_listener', event: 'preUpdate', entity: 'App\Entity\Conference' }
 
+    Snipe\BanBuilder\CensorWords:
+        public: true
+        autowire: true
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
