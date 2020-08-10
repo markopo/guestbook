@@ -10,6 +10,7 @@ use App\Repository\ConferenceRepository;
 use App\Service\CacheService;
 use App\Service\CommentTransformerService;
 use App\Service\ConferenceTransformerService;
+use App\Service\SpamCheckerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,13 +34,16 @@ class ConferenceController extends AbstractController
 
     private LoggerInterface $logger;
 
+    private SpamCheckerService $spamCheckerService;
+
 
     public function __construct(ConferenceTransformerService $conferenceTransformerService,
                                 CacheService $cacheService,
                                 EntityManagerInterface $entityManager,
                                 ConferenceRepository $conferenceRepository,
                                 CommentRepository $commentRepository,
-                                LoggerInterface $logger)
+                                LoggerInterface $logger,
+                                SpamCheckerService $spamCheckerService)
     {
         $this->cacheService = $cacheService;
         $this->conferenceTransformerService = $conferenceTransformerService;
@@ -47,6 +51,7 @@ class ConferenceController extends AbstractController
         $this->conferenceRepository = $conferenceRepository;
         $this->commentRepository = $commentRepository;
         $this->logger = $logger;
+        $this->spamCheckerService = $spamCheckerService;
     }
 
 
@@ -85,6 +90,13 @@ class ConferenceController extends AbstractController
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid() && $conferenceId > 0) {
+
+            $comment->setCreatedAtValue();
+
+            if($this->checkSpam($request, $comment)) {
+                throw new \RuntimeException('Blatant spam, go away!');
+            }
+
             $conf = $this->saveComment($conferenceId, $comment, $form, $photoDir, $confCacheKey);
             return $this->redirectToRoute('conference', [ 'slug' => $conf->getSlug() ]);
         }
@@ -93,6 +105,22 @@ class ConferenceController extends AbstractController
             'conference' => $conference,
             'comment_form' => $form->createView()
         ]);
+    }
+
+    private function checkSpam(Request $request, Comment $comment): bool {
+
+        $context = [
+            'user_ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('user-agent'),
+            'referrer' => $request->headers->get('referer'),
+            'permalink' => $request->getUri(),
+        ];
+
+        $spamScore = $this->spamCheckerService->getSpamScore($comment, $context);
+
+        $this->logger->notice('SPAM SCORE: '. $spamScore . ' ' . date('Y-m-d H:i:s'));
+
+        return 0 !== $spamScore;
     }
 
     /**
@@ -108,7 +136,7 @@ class ConferenceController extends AbstractController
     {
         $conf = $this->conferenceRepository->find($conferenceId);
         $comment->setConference($conf);
-        $comment->setCreatedAtValue();
+
 
         /** @var UploadedFile $brochureFile */
         $photo = $form->get('photoFileName')->getData();

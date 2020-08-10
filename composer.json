@@ -17,7 +17,7 @@
         "symfony/flex": "^1.3.1",
         "symfony/form": "*",
         "symfony/framework-bundle": "*",
-        "symfony/http-client": "*",
+        "symfony/http-client": "5.1.*",
         "symfony/intl": "*",
         "symfony/mailer": "*",
         "symfony/mime": "*",
